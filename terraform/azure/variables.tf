@@ -25,6 +25,13 @@ variable "appsubnetcidr" {
   nullable    = false
 }
 
+variable "ssl_certificate_name" {
+  description = "Name of the SSL certificate"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "tags" {
   description = "A mapping of tags to assign to resources."
   type        = map(string)

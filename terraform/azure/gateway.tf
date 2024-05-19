@@ -8,6 +8,14 @@ resource "azurerm_public_ip" "appgateway" {
   tags = var.tags
 }
 
+locals {
+  frontend_ip_configuration_name = "${var.environment_name}-feip"
+  backend_address_pool_name      = "${var.environment_name}-beap"
+  backend_http_settings_name     = "${var.environment_name}-be-http"
+  http_listener_name             = "${var.environment_name}-http"
+  https_listener_name            = "${var.environment_name}-https"
+}
+
 resource "azurerm_application_gateway" "network" {
   name                = "${var.environment_name}-appgateway"
   resource_group_name = azurerm_resource_group.this.name
@@ -29,18 +37,23 @@ resource "azurerm_application_gateway" "network" {
     port = 80
   }
 
+  frontend_port {
+    name = "https"
+    port = 443
+  }
+
   frontend_ip_configuration {
-    name                 = "${var.environment_name}-feip"
+    name                 = local.frontend_ip_configuration_name
     public_ip_address_id = azurerm_public_ip.appgateway.id
   }
 
   backend_address_pool {
-    name         = "${var.environment_name}-beap"
+    name         = local.backend_address_pool_name
     ip_addresses = ["10.0.0.10"]
   }
 
   backend_http_settings {
-    name                  = "${var.environment_name}-be-htst"
+    name                  = local.backend_http_settings_name
     cookie_based_affinity = "Disabled"
     path                  = "/"
     port                  = 80
@@ -49,18 +62,43 @@ resource "azurerm_application_gateway" "network" {
   }
 
   http_listener {
-    name                           = "${var.environment_name}-httplstn"
-    frontend_ip_configuration_name = "${var.environment_name}-feip"
+    name                           = local.http_listener_name
+    frontend_ip_configuration_name = local.frontend_ip_configuration_name
     frontend_port_name             = "http"
     protocol                       = "Http"
   }
 
+  dynamic "http_listener" {
+    for_each = var.ssl_certificate_name != null ? ["listener"] : []
+
+    content {
+      name                           = local.https_listener_name
+      frontend_ip_configuration_name = local.frontend_ip_configuration_name
+      frontend_port_name             = "https"
+      protocol                       = "Https"
+      ssl_certificate_name           = var.ssl_certificate_name
+    }
+  }
+
   request_routing_rule {
-    name                       = "${var.environment_name}-rqrt"
+    name                       = "${var.environment_name}-http"
     priority                   = 9
     rule_type                  = "Basic"
-    http_listener_name         = "${var.environment_name}-httplstn"
-    backend_address_pool_name  = "${var.environment_name}-beap"
-    backend_http_settings_name = "${var.environment_name}-be-htst"
+    http_listener_name         = local.http_listener_name
+    backend_address_pool_name  = local.backend_address_pool_name
+    backend_http_settings_name = local.backend_http_settings_name
   }
+
+  dynamic "request_routing_rule" {
+    for_each = var.ssl_certificate_name != null ? ["routing"] : []
+
+    content {
+      name                       = "${var.environment_name}-https"
+      rule_type                  = "Basic"
+      http_listener_name         = local.https_listener_name
+      backend_address_pool_name  = local.backend_address_pool_name
+      backend_http_settings_name = local.backend_http_settings_name
+    }
+  }
+
 }

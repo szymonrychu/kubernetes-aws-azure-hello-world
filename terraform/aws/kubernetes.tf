@@ -35,3 +35,16 @@ resource "helm_release" "loadbalancer-controller" {
     value = local.k8s_sa_lb_name
   }
 }
+
+resource "helm_release" "hello-world" {
+  name = "hello-world"
+
+  chart = "${path.module}/../../charts/hello-world"
+
+  namespace = "default"
+
+  values = [
+    file("${path.module}/../../values/common.yaml"),
+    file("${path.module}/../../values/aws/common.yaml"),
+  ]
+}

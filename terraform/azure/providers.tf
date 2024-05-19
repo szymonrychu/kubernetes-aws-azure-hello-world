@@ -8,9 +8,9 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">=2.24.0"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 2.50.0"
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">=2.13.2"
     }
   }
 }
@@ -19,12 +19,18 @@ provider "azurerm" {
   features {}
 }
 
-provider "azuread" {
-}
-
 provider "kubernetes" {
   host                   = module.aks.host
   client_certificate     = base64decode(module.aks.client_certificate)
   client_key             = base64decode(module.aks.client_key)
   cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.aks.host
+    client_certificate     = base64decode(module.aks.client_certificate)
+    client_key             = base64decode(module.aks.client_key)
+    cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
+  }
 }

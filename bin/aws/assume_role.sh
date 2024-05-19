@@ -1,10 +1,6 @@
 #!/bin/bash
 
-if ! env | grep OP_SESSION_ > /dev/null; then
-    eval $(op signin)
-fi
-
-eval $(pmv env aws/mend-io)
+set -eou nounset
 
 current_aws_acc="$(aws sts get-caller-identity --query Account --output text)"
 role_arn="arn:aws:iam::${current_aws_acc}:role/${1:-}"
