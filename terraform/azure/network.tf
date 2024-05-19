@@ -1,9 +1,3 @@
-resource "azurerm_route_table" "rt1" {
-  location            = var.location
-  name                = var.environment_name
-  resource_group_name = azurerm_resource_group.this.name
-}
-
 resource "azurerm_network_security_group" "web" {
   name                = "${var.environment_name}-web"
   location            = var.location
@@ -87,6 +81,11 @@ resource "azurerm_nat_gateway" "natgateway" {
   idle_timeout_in_minutes = 10
 }
 
+resource "azurerm_subnet_nat_gateway_association" "natgateway" {
+  subnet_id      = lookup(module.vnet.vnet_subnets_name_id, "app")
+  nat_gateway_id = azurerm_nat_gateway.natgateway.id
+}
+
 resource "azurerm_nat_gateway_public_ip_association" "natipassoc" {
   nat_gateway_id       = azurerm_nat_gateway.natgateway.id
   public_ip_address_id = azurerm_public_ip.nat.id
@@ -106,12 +105,6 @@ module "vnet" {
   nsg_ids = {
     web = azurerm_network_security_group.web.id
     app = azurerm_network_security_group.app.id
-  }
-
-
-  route_tables_ids = {
-    app = azurerm_route_table.rt1.id
-    web = azurerm_route_table.rt1.id
   }
 
   subnet_enforce_private_link_endpoint_network_policies = {

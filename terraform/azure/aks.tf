@@ -25,9 +25,10 @@ module "aks" {
     ]
     not_allowed = []
   }
-  net_profile_dns_service_ip = "10.2.0.2"
+  net_profile_dns_service_ip = "10.2.0.10"
   net_profile_service_cidr   = "10.2.0.0/16"
-  rbac_aad                   = false
+
+  rbac_aad = false
   # role_based_access_control_enabled = true
 
   brown_field_application_gateway_for_ingress = {

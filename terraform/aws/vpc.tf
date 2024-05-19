@@ -10,9 +10,8 @@ module "vpc" {
   public_subnets  = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
 
   # cost saving measures (1 NAT gateway instead of 3)
-  enable_nat_gateway     = true
-  single_nat_gateway     = true
-  one_nat_gateway_per_az = false
+  enable_nat_gateway = true
+  single_nat_gateway = true
 
   enable_vpn_gateway   = false
   enable_dns_hostnames = true
