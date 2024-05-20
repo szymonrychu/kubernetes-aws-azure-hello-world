@@ -1,0 +1,8 @@
+service:
+  type: NodePort
+
+ingress:
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/tags: Environment=hello-world

@@ -1,0 +1,30 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-yaml
+      exclude: ^charts/
+      args:
+        - --allow-multiple-documents
+    - id: check-added-large-files
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.23
+    hooks:
+      - id: tflint
+        args:
+          - "--config=__GIT_ROOT__/.tflint.hcl"
+      - id: terraform-validate
+      - id: terraform-fmt
+        args:
+          - "-write=true"
+          - "-recursive"
